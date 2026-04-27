@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IOL Calculation Stability Studio</title>
+  <style>
+    :root {
+      --primary: #243447;
+      --accent: #2f80ed;
+      --accent2: #56ccf2;
+      --success: #219653;
+      --warning: #f2994a;
+      --danger: #eb5757;
+      --muted: #6b7a89;
+      --bg: #eef3f7;
+      --card: #ffffff;
+      --line: #dfe7ef;
+      --soft: #f8fbff;
+      --ink: #1f2d3d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(180deg, #f5f8fb 0%, #edf2f7 100%);
+      color: var(--ink);
+      padding: 24px;
+    }
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      background: var(--card);
+      border-radius: 22px;
+      box-shadow: 0 18px 44px rgba(25, 42, 62, 0.10);
+      overflow: hidden;
+    }
+    .hero {
+      background: linear-gradient(135deg, #243447 0%, #2f80ed 100%);
+      color: white;
+      padding: 28px 30px 20px;
+    }
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+    }
+    .hero-copy { flex: 1 1 auto; }
+    .hero-logo {
+      flex: 0 0 auto;
+      background: rgba(255,255,255,0.94);
+      padding: 8px 12px;
+      border-radius: 14px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+    }
+    .hero-logo img {
+      display: block;
+      height: 54px;
+      width: auto;
+      object-fit: contain;
+    }
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: 1.85rem;
+      letter-spacing: 0.01em;
+    }
+    .hero p {
+      margin: 0;
+      line-height: 1.65;
+      font-size: 0.96rem;
+      color: rgba(255,255,255,0.9);
+    }
+    .hero-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .meta-chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 0.8rem;
+    }
+    .body { padding: 28px 30px 34px; }
+    .notice {
+      border: 1px solid #b9d4f8;
+      background: #f5fbff;
+      color: #22415f;
+      border-radius: 14px;
+      padding: 14px 16px;
+      line-height: 1.68;
+      font-size: 0.92rem;
+      margin-bottom: 20px;
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .toolbar-card, .panel, .card, .teaching-card {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .toolbar-card h3, .panel h2, .card h3, .teaching-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+    .toolbar-card p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+    .preset-row, .mode-row, .formula-select {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button, select {
+      font: inherit;
+    }
+    .pill-btn, .formula-btn, .ghost-btn {
+      border: 1px solid #d7e0e9;
+      background: white;
+      color: var(--ink);
+      padding: 9px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.85rem;
+    }
+    .pill-btn:hover, .formula-btn:hover, .ghost-btn:hover { transform: translateY(-1px); }
+    .pill-btn.active, .formula-btn.active, .ghost-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .recommend-tag {
+      font-size: 0.68rem;
+      background: var(--success);
+      color: white;
+      padding: 2px 7px;
+      border-radius: 999px;
+      margin-left: 6px;
+      display: none;
+      vertical-align: middle;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .stack { display: grid; gap: 18px; }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .section-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin: 0 0 12px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--line);
+    }
+    .param-group { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .val-display {
+      float: right;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+    .hint {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.95fr;
+      gap: 16px;
+    }
+    .score-card {
+      border-radius: 18px;
+      border: 2px solid var(--line);
+      background: white;
+      padding: 20px;
+      transition: 0.3s;
+    }
+    .label-top {
+      display: inline-block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .score-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .score-value {
+      font-size: 3.6rem;
+      line-height: 1;
+      font-weight: 800;
+    }
+    .score-unit {
+      font-size: 1rem;
+      color: var(--muted);
+      padding-bottom: 6px;
+    }
+    .status-chip {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .result-comment {
+      margin-top: 12px;
+      line-height: 1.68;
+      font-size: 0.95rem;
+    }
+    .mini-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .mini-box {
+      background: #f8fbff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+    }
+    .mini-box strong {
+      display: block;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+    .mini-box span {
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+    .reason-list {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      line-height: 1.7;
+      font-size: 0.92rem;
+    }
+    .metric-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 0.9rem;
+    }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-row span:last-child {
+      color: var(--accent);
+      font-weight: 700;
+      text-align: right;
+    }
+    .rank-list { display: grid; gap: 8px; }
+    .rank-item {
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #edf2f7;
+    }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: var(--accent);
+      background: #eaf2fd;
+      font-size: 0.82rem;
+    }
+    .rank-main { font-size: 0.92rem; line-height: 1.45; }
+    .rank-main small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.77rem;
+    }
+    .rank-score { font-size: 1rem; font-weight: 800; }
+    .bar-list { display: grid; gap: 10px; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 42px;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.86rem;
+    }
+    .bar-track {
+      height: 12px;
+      border-radius: 999px;
+      background: #edf3fa;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      width: 0;
+    }
+    .heat-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .heat-box {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: white;
+    }
+    .heat-box h4 {
+      margin: 0 0 8px;
+      font-size: 0.9rem;
+    }
+    .heat-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 0.84rem;
+    }
+    .heat-row:last-child { border-bottom: none; }
+    .heat-tag {
+      padding: 3px 7px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .low { background: #daf5e5; color: var(--success); }
+    .mid { background: #fde8d6; color: #b96a1d; }
+    .high { background: #fde1e1; color: var(--danger); }
+    .svg-wrap {
+      width: 100%;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .svg-caption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.55;
+    }
+    .teaching-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .teaching-card p, .teaching-card ul {
+      margin: 0;
+      line-height: 1.65;
+      font-size: 0.9rem;
+    }
+    .teaching-card ul { padding-left: 18px; }
+    .footnote {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.65;
+    }
+    .inline-select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #d7e0e9;
+      background: white;
+      color: var(--ink);
+    }
+    .toggle-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    @media (max-width: 1080px) {
+      .layout, .results-grid, .toolbar, .teaching-grid { grid-template-columns: 1fr; }
+      .grid2, .heat-card-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      body { padding: 14px; }
+      .hero, .body { padding-left: 18px; padding-right: 18px; }
+      .hero-top { flex-direction: column; align-items: flex-start; }
+      .hero-logo img { height: 42px; }
+      .mini-metrics { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 90px 1fr 40px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-copy">
+        <h1>IOL Calculation Stability Studio</h1>
+        <p>生体計測値のバランスから、IOL度数計算の安定性・症例難易度・計算式間差の出やすさを教育目的で可視化する拡張版スタジオです。統計学的な予後予測ではなく、症例のどこが非典型なのか、どのパラメータに感度が高いのかを学ぶための概念モデルとして設計しています。</p>
+        <div class="hero-meta">
+          <span class="meta-chip">教育用モデル</span>
+          <span class="meta-chip">説明可能性重視</span>
+          <span class="meta-chip">感度解析つき</span>
+          <span class="meta-chip">ケースプリセット搭載</span>
+        </div>
+      </div>
+      <div class="hero-logo">
+        <img src="rogo.PNG" alt="eyework logo">
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="notice">
+      <strong>注意：</strong>本ツールのスコアや図は、統計学的に検証された確率や実測値ではありません。AL、ACD、LT、K mean、角膜乱視、WTW の関係から、<strong>屈折予測の安定性</strong>、<strong>式間差が出やすい領域</strong>、<strong>どの因子が支配的か</strong>を教育用に示す簡易指標です。実臨床では術者定数、測定機器差、IOL種類、トーリック計算、術後屈折の定義、施設ごとの最適化を別途考慮してください。
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-card">
+        <h3>ケースプリセット</h3>
+        <p>標準症例と非典型症例を即時に呼び出し、どの因子で難易度が上がるかを比較できます。</p>
+        <div class="preset-row" id="preset-row"></div>
+      </div>
+      <div class="toolbar-card">
+        <h3>表示モード</h3>
+        <p>教育の場面に応じて、通常表示・比較表示・感度解析表示を切り替えます。</p>
+        <div class="mode-row" id="mode-row">
+          <button class="ghost-btn active" data-mode="standard">標準</button>
+          <button class="ghost-btn" data-mode="compare">式比較</button>
+          <button class="ghost-btn" data-mode="sensitivity">感度解析</button>
+        </div>
+      </div>
+      <div class="toolbar-card">
+        <h3>感度解析の対象</h3>
+        <p>現在の症例条件を固定したまま、どの変数を動かすとスコアが揺れやすいかを描画します。</p>
+        <select id="sensitivity-param" class="inline-select">
+          <option value="al">眼軸長 (AL)</option>
+          <option value="acd">前房深度 (ACD)</option>
+          <option value="km">K mean</option>
+          <option value="lt">水晶体厚 (LT)</option>
+          <option value="cyl">角膜乱視 (CYL)</option>
+          <option value="wtw">WTW</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="stack">
+        <div class="grid2">
+          <div class="panel">
+            <h2 class="section-title">1. Biometry（生体計測値）</h2>
+            <div class="param-group">
+              <label>眼軸長 (AL): <span class="val-display" id="al_val"></span> mm</label>
+              <input type="range" id="al" min="19" max="32" step="0.01" value="23.5">
+              <span class="hint">短眼軸・長眼軸では計算式の得意帯から外れやすくなります。</span>
+            </div>
+            <div class="param-group">
+              <label>前房深度 (ACD): <span class="val-display" id="acd_val"></span> mm</label>
+              <input type="range" id="acd" min="1.5" max="5" step="0.01" value="3.2">
+              <span class="hint">浅前房・深前房は ELP 推定のばらつきを意識する場面です。</span>
+            </div>
+            <div class="param-group">
+              <label>角膜屈折力 (K mean): <span class="val-display" id="km_val"></span> D</label>
+              <input type="range" id="km" min="36" max="52" step="0.1" value="44.0">
+              <span class="hint">極端な平坦角膜・急峻角膜は標準症例から外れやすくなります。</span>
+            </div>
+            <div class="param-group">
+              <label>水晶体厚 (LT): <span class="val-display" id="lt_val"></span> mm</label>
+              <input type="range" id="lt" min="3.0" max="6.0" step="0.01" value="4.2">
+              <span class="hint">ACD と組み合わせて Relative Lens Position の概念を学ぶために使います。</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h2 class="section-title">2. Corneal / Anatomic Factors</h2>
+            <div class="param-group">
+              <label>角膜乱視 (CYL): <span class="val-display" id="cyl_val"></span> D</label>
+              <input type="range" id="cyl" min="0" max="6" step="0.25" value="0.75">
+              <span class="hint">乱視が強いほど、小さな予測ずれの見え方が臨床的に目立ちやすくなります。</span>
+            </div>
+            <div class="param-group">
+              <label>WTW（角膜横径）: <span class="val-display" id="wtw_val"></span> mm</label>
+              <input type="range" id="wtw" min="10" max="14" step="0.1" value="11.7">
+              <span class="hint">ACD との釣り合いを見ることで、解剖学的にやや非典型な組み合わせを可視化します。</span>
+            </div>
+            <div class="card" style="padding: 14px; margin-top: 6px;">
+              <h3>この画面で見ているもの</h3>
+              <div class="metric-row"><span>安定性スコア</span><span>0–100</span></div>
+              <div class="metric-row"><span>症例難易度</span><span>Low / Moderate / High</span></div>
+              <div class="metric-row"><span>主要ペナルティ因子</span><span>寄与率バー</span></div>
+              <div class="metric-row"><span>感度解析</span><span>1変数 sweep</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="section-title">3. Formula View（計算式の見え方）</h2>
+          <div class="formula-select" id="formula-container">
+            <button class="formula-btn active" data-formula="Kane">Kane <span class="recommend-tag">Broad Fit</span></button>
+            <button class="formula-btn" data-formula="Barrett">Barrett Universal II <span class="recommend-tag">Balanced</span></button>
+            <button class="formula-btn" data-formula="HofferQ">Hoffer Q <span class="recommend-tag">Short AL</span></button>
+            <button class="formula-btn" data-formula="SRKT">SRK/T <span class="recommend-tag">Long AL</span></button>
+          </div>
+          <div class="footnote">推奨タグは教育用の概念表示であり、特定症例における実際の優劣を保証するものではありません。</div>
+        </div>
+
+        <div class="results-grid">
+          <div class="score-card" id="result-card">
+            <span class="label-top">選択中の計算式における概念的な安定性評価</span>
+            <div class="score-row">
+              <span class="score-value" id="score-num">--</span>
+              <span class="score-unit">/ 100</span>
+            </div>
+            <div class="status-chip" id="status-chip">評価中</div>
+            <div class="result-comment" id="result-comment">各数値を調整すると、症例のどこが非典型かを言語化します。</div>
+            <div class="mini-metrics">
+              <div class="mini-box"><strong id="dispersion-num">--</strong><span>式間差</span></div>
+              <div class="mini-box"><strong id="penalty-num">--</strong><span>総ペナルティ</span></div>
+              <div class="mini-box"><strong id="stability-zone">--</strong><span>教育上の区分</span></div>
+            </div>
+            <ul class="reason-list" id="reason-list"></ul>
+          </div>
+
+          <div class="card">
+            <h3>内部指標</h3>
+            <div class="metric-row"><span>Relative Lens Position index</span><span id="rlp_metric">--</span></div>
+            <div class="metric-row"><span>AL-K balance</span><span id="alk_metric">--</span></div>
+            <div class="metric-row"><span>ACD-WTW harmony gap</span><span id="acdw_metric">--</span></div>
+            <div class="metric-row"><span>Corneal complexity load</span><span id="cyl_metric">--</span></div>
+            <div class="metric-row"><span>Selected formula profile</span><span id="formula_metric">--</span></div>
+            <div class="footnote">内部指標は教育のための補助表示です。実測 PE や絶対誤差を直接算出するものではありません。</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>ペナルティ寄与の内訳</h3>
+          <div class="bar-list" id="penalty-bars"></div>
+          <div class="footnote">どの要因がスコア低下に効いているかを視覚化しています。講義では「何が悪いか」ではなく「どこが非典型か」を議論する用途を想定しています。</div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card" id="compare-card">
+          <h3>同条件での相対ランキング</h3>
+          <div class="rank-list" id="ranking-list"></div>
+          <div class="footnote">このモデル内部での相対比較です。一般化した優劣判定ではありません。</div>
+        </div>
+
+        <div class="card" id="sensitivity-card">
+          <h3>感度解析</h3>
+          <div class="svg-wrap">
+            <svg id="sensitivity-svg" viewBox="0 0 520 250" width="100%" height="250" aria-label="sensitivity chart"></svg>
+          </div>
+          <div class="svg-caption" id="sensitivity-caption">現在の症例条件を固定し、選択した1変数のみを動かしたときのスコア変化を表示します。</div>
+        </div>
+
+        <div class="card">
+          <h3>教育用ヒートマップ</h3>
+          <div class="heat-card-grid" id="heat-grid"></div>
+          <div class="footnote">各パラメータが現在どの帯域にあるかを、標準帯・注意帯・非典型帯として整理しています。</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 18px;"></div>
+
+    <div class="teaching-grid">
+      <div class="teaching-card">
+        <h3>What matters now</h3>
+        <p id="teaching-why">現在の症例で支配的な因子を要約します。</p>
+      </div>
+      <div class="teaching-card">
+        <h3>How to teach it</h3>
+        <ul id="teaching-how">
+          <li>係数の正確さではなく、非典型性の組み合わせに着目します。</li>
+        </ul>
+      </div>
+      <div class="teaching-card">
+        <h3>Take-home message</h3>
+        <p id="teaching-takehome">教育用の結論をここに表示します。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const formulaSpecs = {
+  Kane: {
+    baseScore: 91,
+    alRange: [21.0, 29.0],
+    alPenaltyWeight: 5.2,
+    acdWeight: 0.9,
+    kmWeight: 0.9,
+    wtwWeight: 0.9,
+    cylWeight: 0.95,
+    rlpWeight: 0.95,
+    note: '広い眼軸長帯で安定しやすい設定'
+  },
+  Barrett: {
+    baseScore: 89,
+    alRange: [21.5, 28.0],
+    alPenaltyWeight: 5.8,
+    acdWeight: 1.0,
+    kmWeight: 1.0,
+    wtwWeight: 1.0,
+    cylWeight: 1.0,
+    rlpWeight: 1.0,
+    note: 'バランス型の設定'
+  },
+  HofferQ: {
+    baseScore: 82,
+    alRange: [19.0, 23.0],
+    alPenaltyWeight: 6.9,
+    acdWeight: 1.18,
+    kmWeight: 1.0,
+    wtwWeight: 1.0,
+    cylWeight: 1.02,
+    rlpWeight: 1.08,
+    note: '短眼軸寄りで有利な設定'
+  },
+  SRKT: {
+    baseScore: 81,
+    alRange: [24.5, 32.0],
+    alPenaltyWeight: 6.9,
+    acdWeight: 1.0,
+    kmWeight: 1.12,
+    wtwWeight: 1.05,
+    cylWeight: 1.0,
+    rlpWeight: 1.0,
+    note: '長眼軸寄りで有利な設定'
+  }
+};
+
+const paramConfigs = {
+  al: { label: '眼軸長 (AL)', min: 19, max: 32, step: 0.01, digits: 2, unit: 'mm', sweepSpan: 1.2 },
+  acd: { label: '前房深度 (ACD)', min: 1.5, max: 5, step: 0.01, digits: 2, unit: 'mm', sweepSpan: 0.55 },
+  km: { label: 'K mean', min: 36, max: 52, step: 0.1, digits: 1, unit: 'D', sweepSpan: 1.8 },
+  lt: { label: '水晶体厚 (LT)', min: 3, max: 6, step: 0.01, digits: 2, unit: 'mm', sweepSpan: 0.45 },
+  cyl: { label: '角膜乱視 (CYL)', min: 0, max: 6, step: 0.25, digits: 2, unit: 'D', sweepSpan: 1.0 },
+  wtw: { label: 'WTW', min: 10, max: 14, step: 0.1, digits: 1, unit: 'mm', sweepSpan: 0.55 }
+};
+
+const presets = {
+  standard: { label: '標準症例', values: { al: 23.5, acd: 3.2, km: 44.0, lt: 4.2, cyl: 0.75, wtw: 11.7 } },
+  shortEye: { label: '短眼軸・浅前房', values: { al: 21.2, acd: 2.35, km: 45.2, lt: 4.7, cyl: 1.00, wtw: 11.2 } },
+  longEye: { label: '長眼軸・平坦角膜', values: { al: 28.3, acd: 3.55, km: 40.2, lt: 4.0, cyl: 0.50, wtw: 12.1 } },
+  toricHeavy: { label: '強乱視症例', values: { al: 24.1, acd: 3.05, km: 44.5, lt: 4.3, cyl: 3.75, wtw: 11.8 } },
+  unbalanced: { label: '非典型バランス', values: { al: 22.0, acd: 4.45, km: 47.8, lt: 3.15, cyl: 2.00, wtw: 10.6 } }
+};
+
+const params = ['al', 'acd', 'km', 'lt', 'cyl', 'wtw'];
+let activeFormula = 'Kane';
+let activeMode = 'standard';
+let activePreset = 'standard';
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function formatValue(value, digits = 2) {
+  return Number(value).toFixed(digits);
+}
+
+function deviationOutsideRange(value, min, max) {
+  if (value < min) return min - value;
+  if (value > max) return value - max;
+  return 0;
+}
+
+function penaltyRecord(key, label, impact) {
+  return { key, label, impact: Math.max(0, impact) };
+}
+
+function assessFormula(data, formulaName) {
+  const spec = formulaSpecs[formulaName];
+  const penalties = [];
+
+  const alDev = deviationOutsideRange(data.al, spec.alRange[0], spec.alRange[1]);
+  const alPenalty = alDev * spec.alPenaltyWeight;
+  penalties.push(penaltyRecord('al', 'ALが得意帯から外れる', alPenalty));
+
+  let acdPenalty = 0;
+  if (data.acd < 2.4) acdPenalty += (2.4 - data.acd) * 6.0 * spec.acdWeight;
+  if (data.acd > 4.2) acdPenalty += (data.acd - 4.2) * 5.0 * spec.acdWeight;
+  penalties.push(penaltyRecord('acd', 'ACDが極端', acdPenalty));
+
+  let kmPenalty = 0;
+  if (data.km < 40.0) kmPenalty += (40.0 - data.km) * 1.7 * spec.kmWeight;
+  if (data.km > 47.0) kmPenalty += (data.km - 47.0) * 1.7 * spec.kmWeight;
+  penalties.push(penaltyRecord('km', 'K meanが極端', kmPenalty));
+
+  let cylPenalty = 0;
+  if (data.cyl > 1.5) cylPenalty += (data.cyl - 1.5) * 2.9 * spec.cylWeight;
+  if (data.cyl > 3.0) cylPenalty += (data.cyl - 3.0) * 0.8 * spec.cylWeight;
+  penalties.push(penaltyRecord('cyl', '角膜乱視が強い', cylPenalty));
+
+  const rlp = data.acd + 0.5 * data.lt;
+  let rlpPenalty = 0;
+  if (rlp < 4.5) rlpPenalty += (4.5 - rlp) * 5.2 * spec.rlpWeight;
+  if (rlp > 5.8) rlpPenalty += (rlp - 5.8) * 5.2 * spec.rlpWeight;
+  penalties.push(penaltyRecord('rlp', 'ACDとLTの組み合わせが非典型', rlpPenalty));
+
+  const alkIndex = data.al - (data.km - 43.0) * 0.22;
+  let alkPenalty = 0;
+  if (alkIndex < 22.0) alkPenalty += (22.0 - alkIndex) * 1.6;
+  if (alkIndex > 25.6) alkPenalty += (alkIndex - 25.6) * 1.6;
+  penalties.push(penaltyRecord('alk', 'AL-K balanceが非典型', alkPenalty));
+
+  const expectedAcd = 3.0 + (data.wtw - 11.7) * 0.22;
+  const acdWtwGap = Math.abs(data.acd - expectedAcd);
+  const acdWtwPenalty = Math.max(0, acdWtwGap - 0.45) * 5.0 * spec.wtwWeight;
+  penalties.push(penaltyRecord('wtw', 'ACD-WTWの釣り合いが崩れる', acdWtwPenalty));
+
+  let synergyPenalty = 0;
+  if (data.al < 22.0 && data.acd < 2.5) synergyPenalty += 2.2;
+  if (data.al > 27.0 && data.km < 41.0) synergyPenalty += 2.4;
+  if (data.cyl > 3.0 && (data.km > 46.5 || data.km < 40.5)) synergyPenalty += 1.8;
+  if (acdWtwGap > 0.8 && rlp > 5.9) synergyPenalty += 1.6;
+  penalties.push(penaltyRecord('synergy', '複数の非典型性が重なる', synergyPenalty));
+
+  const totalPenalty = penalties.reduce((sum, p) => sum + p.impact, 0);
+  const score = clamp(Math.round(spec.baseScore - totalPenalty), 35, 97);
+
+  const sorted = penalties.filter(p => p.impact > 0.05).sort((a, b) => b.impact - a.impact);
+  const reasons = sorted.slice(0, 4).map(p => p.label);
+
+  return {
+    score,
+    totalPenalty,
+    reasons,
+    penalties,
+    metrics: {
+      rlp,
+      alkIndex,
+      acdWtwGap,
+      cylLoad: data.cyl > 1.5 ? (data.cyl - 1.5) : 0,
+      note: spec.note
+    }
+  };
+}
+
+function getData() {
+  const data = {};
+  params.forEach(id => {
+    data[id] = parseFloat(document.getElementById(id).value);
+  });
+  return data;
+}
+
+function setData(values) {
+  params.forEach(id => {
+    document.getElementById(id).value = values[id];
+  });
+}
+
+function updateDisplayValues(data) {
+  params.forEach(id => {
+    const cfg = paramConfigs[id];
+    document.getElementById(id + '_val').innerText = formatValue(data[id], cfg.digits);
+  });
+}
+
+function updateRecommendations(data) {
+  document.querySelectorAll('.formula-btn').forEach(btn => {
+    const f = btn.dataset.formula;
+    const tag = btn.querySelector('.recommend-tag');
+    if (!tag) return;
+    tag.style.display = 'none';
+    if (f === 'Kane') {
+      tag.innerText = 'Broad Fit';
+      tag.style.display = 'inline-block';
+    }
+    if (f === 'Barrett' && data.al >= 22 && data.al <= 26.5) {
+      tag.innerText = 'Balanced';
+      tag.style.display = 'inline-block';
+    }
+    if (f === 'HofferQ' && data.al < 22.2) {
+      tag.innerText = 'Short AL';
+      tag.style.display = 'inline-block';
+    }
+    if (f === 'SRKT' && data.al > 26.0) {
+      tag.innerText = 'Long AL';
+      tag.style.display = 'inline-block';
+    }
+  });
+}
+
+function computeRanking(data) {
+  return Object.keys(formulaSpecs)
+    .map(name => ({ name, ...assessFormula(data, name) }))
+    .sort((a, b) => b.score - a.score);
+}
+
+function renderRanking(ranking) {
+  const el = document.getElementById('ranking-list');
+  el.innerHTML = ranking.map((item, index) => `
+    <div class="rank-item">
+      <div class="rank-badge">${index + 1}</div>
+      <div class="rank-main">
+        ${item.name}
+        <small>${item.metrics.note}</small>
+      </div>
+      <div class="rank-score">${item.score}</div>
+    </div>
+  `).join('');
+}
+
+function renderPenaltyBars(assessment) {
+  const penalties = assessment.penalties.filter(p => p.impact > 0.05).sort((a, b) => b.impact - a.impact);
+  const maxVal = Math.max(1, ...penalties.map(p => p.impact));
+  const el = document.getElementById('penalty-bars');
+  if (!penalties.length) {
+    el.innerHTML = '<div class="footnote" style="margin-top:0;">大きな不安定要因は目立ちません。</div>';
+    return;
+  }
+  el.innerHTML = penalties.map(p => `
+    <div class="bar-row">
+      <div>${p.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(p.impact / maxVal) * 100}%"></div></div>
+      <div>${formatValue(p.impact, 1)}</div>
+    </div>
+  `).join('');
+}
+
+function zoneFromScore(score) {
+  if (score >= 85) return 'Stable';
+  if (score >= 70) return 'Watch';
+  return 'Challenging';
+}
+
+function heatTag(type, text) {
+  return `<span class="heat-tag ${type}">${text}</span>`;
+}
+
+function heatState(value, low1, high1, low2, high2) {
+  if (value >= low1 && value <= high1) return 'low';
+  if (value >= low2 && value <= high2) return 'mid';
+  return 'high';
+}
+
+function renderHeatGrid(data, assessment) {
+  const heat = [];
+  const rlp = assessment.metrics.rlp;
+  const heatDefs = [
+    ['AL', data.al, heatState(data.al, 22, 26, 21, 29), '標準帯 22–26'],
+    ['ACD', data.acd, heatState(data.acd, 2.6, 3.8, 2.4, 4.2), '標準帯 2.6–3.8'],
+    ['K mean', data.km, heatState(data.km, 41, 46, 40, 47), '標準帯 41–46'],
+    ['LT', data.lt, heatState(data.lt, 3.7, 4.8, 3.4, 5.1), '標準帯 3.7–4.8'],
+    ['CYL', data.cyl, data.cyl <= 1.5 ? 'low' : (data.cyl <= 3.0 ? 'mid' : 'high'), '低負荷 ≤1.5'],
+    ['WTW', data.wtw, heatState(data.wtw, 11.2, 12.2, 10.9, 12.5), '標準帯 11.2–12.2'],
+    ['RLP', rlp, heatState(rlp, 4.7, 5.6, 4.5, 5.8), '標準帯 4.7–5.6'],
+    ['AL-K', assessment.metrics.alkIndex, heatState(assessment.metrics.alkIndex, 22.4, 25.0, 22.0, 25.6), '標準帯 22.4–25.0']
+  ];
+  heat.push('<div class="heat-box"><h4>各パラメータの帯域</h4>' + heatDefs.map(row => {
+    const [name, val, level, guide] = row;
+    const text = level === 'low' ? '標準帯' : (level === 'mid' ? '注意帯' : '非典型帯');
+    return `<div class="heat-row"><div>${name}: ${formatValue(val, typeof val === 'number' && !Number.isInteger(val) ? 2 : 1)}<br><span style="color:var(--muted); font-size:0.75rem;">${guide}</span></div><div>${heatTag(level, text)}</div></div>`;
+  }).join('') + '</div>');
+
+  const topPenalty = assessment.penalties.filter(p => p.impact > 0.05).sort((a,b)=>b.impact-a.impact).slice(0,4);
+  heat.push('<div class="heat-box"><h4>現在の支配因子</h4>' + (topPenalty.length ? topPenalty.map(p => {
+    const level = p.impact < 2 ? 'low' : (p.impact < 5 ? 'mid' : 'high');
+    return `<div class="heat-row"><div>${p.label}</div><div>${heatTag(level, formatValue(p.impact,1))}</div></div>`;
+  }).join('') : '<div class="heat-row"><div>大きな支配因子なし</div><div>' + heatTag('low', 'quiet') + '</div></div>') + '</div>');
+
+  document.getElementById('heat-grid').innerHTML = heat.join('');
+}
+
+function svgLinePath(points) {
+  return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+}
+
+function renderSensitivity(data) {
+  const param = document.getElementById('sensitivity-param').value;
+  const cfg = paramConfigs[param];
+  const count = 23;
+  const min = clamp(data[param] - cfg.sweepSpan, cfg.min, cfg.max);
+  const max = clamp(data[param] + cfg.sweepSpan, cfg.min, cfg.max);
+  const values = [];
+
+  for (let i = 0; i < count; i++) {
+    const ratio = i / (count - 1);
+    const xVal = min + (max - min) * ratio;
+    const clone = { ...data, [param]: xVal };
+    values.push({ xVal, score: assessFormula(clone, activeFormula).score });
+  }
+
+  const width = 520, height = 250;
+  const padL = 44, padR = 16, padT = 16, padB = 34;
+  const innerW = width - padL - padR;
+  const innerH = height - padT - padB;
+  const scoreMin = 35;
+  const scoreMax = 97;
+
+  const points = values.map(v => ({
+    x: padL + ((v.xVal - min) / (max - min || 1)) * innerW,
+    y: padT + (1 - ((v.score - scoreMin) / (scoreMax - scoreMin))) * innerH
+  }));
+
+  const currentScore = assessFormula(data, activeFormula).score;
+  const currentX = padL + ((data[param] - min) / (max - min || 1)) * innerW;
+  const currentY = padT + (1 - ((currentScore - scoreMin) / (scoreMax - scoreMin))) * innerH;
+
+  let grid = '';
+  [35, 50, 65, 80, 95].forEach(t => {
+    const y = padT + (1 - ((t - scoreMin) / (scoreMax - scoreMin))) * innerH;
+    grid += `<line x1="${padL}" y1="${y}" x2="${width - padR}" y2="${y}" stroke="#e9eff6" stroke-width="1"></line>`;
+    grid += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" fill="#6b7a89">${t}</text>`;
+  });
+  [min, (min + max) / 2, max].forEach(t => {
+    const x = padL + ((t - min) / (max - min || 1)) * innerW;
+    grid += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${height - padB}" stroke="#f1f5fa" stroke-width="1"></line>`;
+    grid += `<text x="${x}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#6b7a89">${formatValue(t, cfg.digits)}</text>`;
+  });
+
+  const path = svgLinePath(points);
+  const areaPath = `${path} L ${points[points.length - 1].x} ${height - padB} L ${points[0].x} ${height - padB} Z`;
+
+  const svg = `
+    <rect x="0" y="0" width="${width}" height="${height}" fill="white"></rect>
+    ${grid}
+    <path d="${areaPath}" fill="rgba(47,128,237,0.10)"></path>
+    <path d="${path}" fill="none" stroke="#2f80ed" stroke-width="3" stroke-linecap="round"></path>
+    <line x1="${currentX}" y1="${padT}" x2="${currentX}" y2="${height - padB}" stroke="#eb5757" stroke-width="2" stroke-dasharray="5 4"></line>
+    <circle cx="${currentX}" cy="${currentY}" r="5" fill="#eb5757"></circle>
+    <text x="${width / 2}" y="18" text-anchor="middle" font-size="12" fill="#243447">${cfg.label} の変化に対する ${activeFormula} スコア感度</text>
+  `;
+
+  document.getElementById('sensitivity-svg').innerHTML = svg;
+
+  const first = values[0].score;
+  const last = values[values.length - 1].score;
+  const slopeText = Math.abs(last - first) < 4 ? '変化は比較的緩やかです。' : (last < first ? '右側へ行くほど不安定化しやすい傾向です。' : '右側へ行くほど改善方向へ動く傾向です。');
+  document.getElementById('sensitivity-caption').innerText = `現在値 ${formatValue(data[param], cfg.digits)} ${cfg.unit} を中心に ${cfg.label} を sweep しています。${slopeText}`;
+}
+
+function renderTeachingText(data, assessment, ranking) {
+  const dominant = assessment.penalties.filter(p => p.impact > 0.05).sort((a,b)=>b.impact-a.impact).slice(0,3);
+  const dominantText = dominant.length ? dominant.map(d => d.label).join('、') : '大きな支配因子は目立ちません';
+  const best = ranking[0];
+  const spread = ranking[0].score - ranking[ranking.length - 1].score;
+
+  document.getElementById('teaching-why').innerText = `現在の症例では ${dominantText} が主要な論点です。講義では、単独因子ではなく「複数の非典型性がどのように重なるか」を強調すると理解が進みます。`;
+
+  document.getElementById('teaching-how').innerHTML = `
+    <li>まず AL と K mean の組み合わせを見て、眼球全体のプロポーションを説明する。</li>
+    <li>次に ACD・LT・WTW から ELP 推定の難しさを示す。</li>
+    <li>最後に強乱視や複数因子の重なりが「小さな誤差を目立たせる」ことを補足する。</li>
+  `;
+
+  let takehome = `この条件では ${best.name} がこのモデル内で最も高スコアですが、重要なのは式名よりも症例プロポーションです。`;
+  if (spread >= 10) {
+    takehome += ' 式間差が比較的大きく、比較読みに教育的価値があります。';
+  } else {
+    takehome += ' 式間差は比較的小さく、症例自体は概ね標準帯に近いと解釈できます。';
+  }
+  document.getElementById('teaching-takehome').innerText = takehome;
+}
+
+function applyMode() {
+  const compareCard = document.getElementById('compare-card');
+  const sensitivityCard = document.getElementById('sensitivity-card');
+
+  if (activeMode === 'standard') {
+    compareCard.style.display = 'block';
+    sensitivityCard.style.display = 'block';
+  } else if (activeMode === 'compare') {
+    compareCard.style.display = 'block';
+    sensitivityCard.style.display = 'none';
+  } else {
+    compareCard.style.display = 'none';
+    sensitivityCard.style.display = 'block';
+  }
+}
+
+function update() {
+  const data = getData();
+  updateDisplayValues(data);
+  updateRecommendations(data);
+
+  const ranking = computeRanking(data);
+  renderRanking(ranking);
+
+  const assessment = assessFormula(data, activeFormula);
+  renderPenaltyBars(assessment);
+  renderHeatGrid(data, assessment);
+  renderSensitivity(data);
+  renderTeachingText(data, assessment, ranking);
+  applyMode();
+
+  const score = assessment.score;
+  const spread = ranking[0].score - ranking[ranking.length - 1].score;
+  const card = document.getElementById('result-card');
+  const chip = document.getElementById('status-chip');
+  const comment = document.getElementById('result-comment');
+  const reasonList = document.getElementById('reason-list');
+
+  document.getElementById('score-num').innerText = score;
+  document.getElementById('rlp_metric').innerText = formatValue(assessment.metrics.rlp, 2);
+  document.getElementById('alk_metric').innerText = formatValue(assessment.metrics.alkIndex, 2);
+  document.getElementById('acdw_metric').innerText = formatValue(assessment.metrics.acdWtwGap, 2);
+  document.getElementById('cyl_metric').innerText = formatValue(assessment.metrics.cylLoad, 2);
+  document.getElementById('formula_metric').innerText = assessment.metrics.note;
+  document.getElementById('dispersion-num').innerText = formatValue(spread, 0);
+  document.getElementById('penalty-num').innerText = formatValue(assessment.totalPenalty, 1);
+  document.getElementById('stability-zone').innerText = zoneFromScore(score);
+
+  if (score >= 85) {
+    card.style.borderColor = 'var(--success)';
+    card.style.background = '#f4fff8';
+    chip.style.background = '#daf5e5';
+    chip.style.color = 'var(--success)';
+    chip.innerText = 'Low difficulty';
+    comment.innerText = '標準的なプロポーションに近く、このモデルでは比較的安定した条件として評価されます。式間差は小さめに出る想定です。';
+  } else if (score >= 70) {
+    card.style.borderColor = 'var(--warning)';
+    card.style.background = '#fffaf4';
+    chip.style.background = '#fde8d6';
+    chip.style.color = '#b96a1d';
+    chip.innerText = 'Moderate difficulty';
+    comment.innerText = 'やや非典型な要素があり、式間差や測定再確認の必要性を教育的に議論しやすい症例です。';
+  } else {
+    card.style.borderColor = 'var(--danger)';
+    card.style.background = '#fff6f6';
+    chip.style.background = '#fde1e1';
+    chip.style.color = 'var(--danger)';
+    chip.innerText = 'High difficulty';
+    comment.innerText = '複数の非典型性が重なっており、このモデルでは難症例寄りに評価されます。どの因子が主要因かを分けて考えるのが教育上重要です。';
+  }
+
+  const topReasons = assessment.reasons.slice(0, 3);
+  reasonList.innerHTML = topReasons.length ? topReasons.map(r => `<li>${r}</li>`).join('') : '<li>大きな不安定要因は目立ちません。</li>';
+}
+
+function buildPresetButtons() {
+  const row = document.getElementById('preset-row');
+  row.innerHTML = Object.entries(presets).map(([key, preset], index) => `
+    <button class="pill-btn ${index === 0 ? 'active' : ''}" data-preset="${key}">${preset.label}</button>
+  `).join('');
+
+  row.querySelectorAll('.pill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      row.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activePreset = btn.dataset.preset;
+      setData(presets[activePreset].values);
+      update();
+    });
+  });
+}
+
+params.forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    activePreset = '';
+    document.querySelectorAll('#preset-row .pill-btn').forEach(b => b.classList.remove('active'));
+    update();
+  });
+});
+
+document.querySelectorAll('.formula-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.formula-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activeFormula = this.dataset.formula;
+    update();
+  });
+});
+
+document.querySelectorAll('#mode-row .ghost-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#mode-row .ghost-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activeMode = this.dataset.mode;
+    update();
+  });
+});
+
+document.getElementById('sensitivity-param').addEventListener('change', update);
+
+buildPresetButtons();
+setData(presets.standard.values);
+update();
+</script>
+</body>
+</html>
